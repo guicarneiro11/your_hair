@@ -1,13 +1,29 @@
-import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 
-class ScheduleEvent {
-  final String id;
-  final String treatmentId;
-  final DateTime date;
-  final bool isCompleted;
-  final DateTime? completedDate;
-  final int? userRating;
-  final String? userNotes;
+part 'schedule.g.dart';
+
+@HiveType(typeId: 11)
+class ScheduleEvent extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String treatmentId;
+
+  @HiveField(2)
+  DateTime date;
+
+  @HiveField(3)
+  bool isCompleted;
+
+  @HiveField(4)
+  DateTime? completedDate;
+
+  @HiveField(5)
+  int? userRating;
+
+  @HiveField(6)
+  String? userNotes;
 
   ScheduleEvent({
     required this.id,
@@ -38,38 +54,24 @@ class ScheduleEvent {
       userNotes: userNotes ?? this.userNotes,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'treatmentId': treatmentId,
-      'date': date.toIso8601String(),
-      'isCompleted': isCompleted,
-      'completedDate': completedDate?.toIso8601String(),
-      'userRating': userRating,
-      'userNotes': userNotes,
-    };
-  }
-
-  factory ScheduleEvent.fromJson(Map<String, dynamic> json) {
-    return ScheduleEvent(
-      id: json['id'],
-      treatmentId: json['treatmentId'],
-      date: DateTime.parse(json['date']),
-      isCompleted: json['isCompleted'],
-      completedDate: json['completedDate'] != null ? DateTime.parse(json['completedDate']) : null,
-      userRating: json['userRating'],
-      userNotes: json['userNotes'],
-    );
-  }
 }
 
-class Schedule {
-  final String id;
-  final String hairProfileId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final List<ScheduleEvent> events;
+@HiveType(typeId: 12)
+class Schedule extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String hairProfileId;
+
+  @HiveField(2)
+  DateTime startDate;
+
+  @HiveField(3)
+  DateTime endDate;
+
+  @HiveField(4)
+  List<ScheduleEvent> events;
 
   Schedule({
     required this.id,
@@ -92,28 +94,6 @@ class Schedule {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       events: events ?? this.events,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'hairProfileId': hairProfileId,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
-      'events': events.map((e) => e.toJson()).toList(),
-    };
-  }
-
-  factory Schedule.fromJson(Map<String, dynamic> json) {
-    return Schedule(
-      id: json['id'],
-      hairProfileId: json['hairProfileId'],
-      startDate: DateTime.parse(json['startDate']),
-      endDate: DateTime.parse(json['endDate']),
-      events: (json['events'] as List)
-          .map((e) => ScheduleEvent.fromJson(e))
-          .toList(),
     );
   }
 }

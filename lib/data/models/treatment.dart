@@ -1,34 +1,68 @@
-import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 
+part 'treatment.g.dart';
+
+@HiveType(typeId: 8)
 enum TreatmentType {
+  @HiveField(0)
   hydration,
+  @HiveField(1)
   nutrition,
+  @HiveField(2)
   reconstruction,
+  @HiveField(3)
   detox,
+  @HiveField(4)
   exfoliation,
+  @HiveField(5)
   oilTreatment,
+  @HiveField(6)
   haircut,
+  @HiveField(7)
   colorTouch,
+  @HiveField(8)
   hairMask,
+  @HiveField(9)
   chemicalTreatment,
+  @HiveField(10)
   special,
 }
 
+@HiveType(typeId: 9)
 enum TreatmentIntensity {
+  @HiveField(0)
   light,
+  @HiveField(1)
   moderate,
+  @HiveField(2)
   intensive,
 }
 
-class Treatment {
-  final String id;
-  final String name;
-  final TreatmentType type;
-  final TreatmentIntensity intensity;
-  final String description;
-  final int durationMinutes;
-  final int recommendedFrequencyDays;
-  final String? productRecommendations;
+@HiveType(typeId: 10)
+class Treatment extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String name;
+
+  @HiveField(2)
+  TreatmentType type;
+
+  @HiveField(3)
+  TreatmentIntensity intensity;
+
+  @HiveField(4)
+  String description;
+
+  @HiveField(5)
+  int durationMinutes;
+
+  @HiveField(6)
+  int recommendedFrequencyDays;
+
+  @HiveField(7)
+  String? productRecommendations;
 
   Treatment({
     required this.id,
@@ -64,32 +98,6 @@ class Treatment {
       durationMinutes: durationMinutes ?? this.durationMinutes,
       recommendedFrequencyDays: recommendedFrequencyDays ?? this.recommendedFrequencyDays,
       productRecommendations: productRecommendations ?? this.productRecommendations,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type.index,
-      'intensity': intensity.index,
-      'description': description,
-      'durationMinutes': durationMinutes,
-      'recommendedFrequencyDays': recommendedFrequencyDays,
-      'productRecommendations': productRecommendations,
-    };
-  }
-
-  factory Treatment.fromJson(Map<String, dynamic> json) {
-    return Treatment(
-      id: json['id'],
-      name: json['name'],
-      type: TreatmentType.values[json['type']],
-      intensity: TreatmentIntensity.values[json['intensity']],
-      description: json['description'],
-      durationMinutes: json['durationMinutes'],
-      recommendedFrequencyDays: json['recommendedFrequencyDays'],
-      productRecommendations: json['productRecommendations'],
     );
   }
 }

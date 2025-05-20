@@ -1,27 +1,121 @@
-import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 
-enum HairCurvature { straight, wavy, curly, coily }
-enum HairLength { short, medium, long }
-enum HairThickness { fine, medium, thick }
-enum HairOiliness { dry, normal, oily }
-enum HairDamage { none, light, moderate, severe }
-enum HairElasticity { low, medium, high }
-enum HairPorosity { low, medium, high }
+part 'hair_profile.g.dart';
 
-class HairProfile {
-  final String id;
-  final HairCurvature curvature;
-  final HairLength length;
-  final HairThickness thickness;
-  final HairOiliness oiliness;
-  final HairDamage damage;
-  final bool usesHeatStyling;
-  final HairElasticity elasticity;
-  final HairPorosity porosity;
-  final int washFrequencyPerWeek;
-  final DateTime lastCutDate;
-  final DateTime? lastChemicalTreatmentDate;
-  final String? chemicalTreatmentType;
+@HiveType(typeId: 0)
+enum HairCurvature {
+  @HiveField(0)
+  straight,
+  @HiveField(1)
+  wavy,
+  @HiveField(2)
+  curly,
+  @HiveField(3)
+  coily
+}
+
+@HiveType(typeId: 1)
+enum HairLength {
+  @HiveField(0)
+  short,
+  @HiveField(1)
+  medium,
+  @HiveField(2)
+  long
+}
+
+@HiveType(typeId: 2)
+enum HairThickness {
+  @HiveField(0)
+  fine,
+  @HiveField(1)
+  medium,
+  @HiveField(2)
+  thick
+}
+
+@HiveType(typeId: 3)
+enum HairOiliness {
+  @HiveField(0)
+  dry,
+  @HiveField(1)
+  normal,
+  @HiveField(2)
+  oily
+}
+
+@HiveType(typeId: 4)
+enum HairDamage {
+  @HiveField(0)
+  none,
+  @HiveField(1)
+  light,
+  @HiveField(2)
+  moderate,
+  @HiveField(3)
+  severe
+}
+
+@HiveType(typeId: 5)
+enum HairElasticity {
+  @HiveField(0)
+  low,
+  @HiveField(1)
+  medium,
+  @HiveField(2)
+  high
+}
+
+@HiveType(typeId: 6)
+enum HairPorosity {
+  @HiveField(0)
+  low,
+  @HiveField(1)
+  medium,
+  @HiveField(2)
+  high
+}
+
+@HiveType(typeId: 7)
+class HairProfile extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  HairCurvature curvature;
+
+  @HiveField(2)
+  HairLength length;
+
+  @HiveField(3)
+  HairThickness thickness;
+
+  @HiveField(4)
+  HairOiliness oiliness;
+
+  @HiveField(5)
+  HairDamage damage;
+
+  @HiveField(6)
+  bool usesHeatStyling;
+
+  @HiveField(7)
+  HairElasticity elasticity;
+
+  @HiveField(8)
+  HairPorosity porosity;
+
+  @HiveField(9)
+  int washFrequencyPerWeek;
+
+  @HiveField(10)
+  DateTime lastCutDate;
+
+  @HiveField(11)
+  DateTime? lastChemicalTreatmentDate;
+
+  @HiveField(12)
+  String? chemicalTreatmentType;
 
   HairProfile({
     required this.id,
@@ -68,44 +162,6 @@ class HairProfile {
       lastCutDate: lastCutDate ?? this.lastCutDate,
       lastChemicalTreatmentDate: lastChemicalTreatmentDate ?? this.lastChemicalTreatmentDate,
       chemicalTreatmentType: chemicalTreatmentType ?? this.chemicalTreatmentType,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'curvature': curvature.index,
-      'length': length.index,
-      'thickness': thickness.index,
-      'oiliness': oiliness.index,
-      'damage': damage.index,
-      'usesHeatStyling': usesHeatStyling,
-      'elasticity': elasticity.index,
-      'porosity': porosity.index,
-      'washFrequencyPerWeek': washFrequencyPerWeek,
-      'lastCutDate': lastCutDate.toIso8601String(),
-      'lastChemicalTreatmentDate': lastChemicalTreatmentDate?.toIso8601String(),
-      'chemicalTreatmentType': chemicalTreatmentType,
-    };
-  }
-
-  factory HairProfile.fromJson(Map<String, dynamic> json) {
-    return HairProfile(
-      id: json['id'],
-      curvature: HairCurvature.values[json['curvature']],
-      length: HairLength.values[json['length']],
-      thickness: HairThickness.values[json['thickness']],
-      oiliness: HairOiliness.values[json['oiliness']],
-      damage: HairDamage.values[json['damage']],
-      usesHeatStyling: json['usesHeatStyling'],
-      elasticity: HairElasticity.values[json['elasticity']],
-      porosity: HairPorosity.values[json['porosity']],
-      washFrequencyPerWeek: json['washFrequencyPerWeek'],
-      lastCutDate: DateTime.parse(json['lastCutDate']),
-      lastChemicalTreatmentDate: json['lastChemicalTreatmentDate'] != null
-          ? DateTime.parse(json['lastChemicalTreatmentDate'])
-          : null,
-      chemicalTreatmentType: json['chemicalTreatmentType'],
     );
   }
 }
