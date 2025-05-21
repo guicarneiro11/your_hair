@@ -377,8 +377,6 @@ class _HomePageState extends State<HomePage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
-            Text('Duração: ${treatment.durationMinutes} minutos'),
           ],
         ),
         trailing: Checkbox(
@@ -434,7 +432,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.6, // Um pouco menor
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -467,9 +465,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 16),
                   _buildDetailRow(Icons.category, 'Tipo', _getTreatmentTypeText(treatment.type)),
-                  _buildDetailRow(Icons.fitness_center, 'Intensidade', _getIntensityText(treatment.intensity)),
-                  _buildDetailRow(Icons.timer, 'Duração', '${treatment.durationMinutes} minutos'),
-                  _buildDetailRow(Icons.calendar_today, 'Frequência Recomendada', '${treatment.recommendedFrequencyDays} dias'),
                   const SizedBox(height: 16),
                   const Text(
                     'Descrição',
@@ -480,10 +475,11 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(treatment.description),
-                  if (treatment.productRecommendations != null) ...[
+                  if (treatment.productRecommendations != null &&
+                      treatment.productRecommendations!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     const Text(
-                      'Produtos Recomendados',
+                      'Produtos Sugeridos',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
