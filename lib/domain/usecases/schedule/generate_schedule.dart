@@ -245,7 +245,168 @@ class GenerateScheduleUseCase {
       ));
     }
 
+    if (profile.wantsUmectacao) {
+      final umectacaoTreatments = availableTreatments
+          .where((t) => t.id == 'umectacao')
+          .toList();
+
+      if (umectacaoTreatments.isNotEmpty) {
+        final frequency = 7; // semanal
+
+        for (int day = 7; day < durationInWeeks * 7; day += frequency) {
+          final treatmentDate = startDate.add(Duration(days: day));
+          events.add(ScheduleEvent(
+            id: uuid.v4(),
+            treatmentId: umectacaoTreatments.first.id,
+            date: treatmentDate,
+          ));
+        }
+      }
+    }
+
+    // 2. Tonalização/Matização (a cada 15-20 dias)
+    if (profile.wantsTonalizacao) {
+      final tonalizacaoTreatments = availableTreatments
+          .where((t) => t.id == 'tonalizacao')
+          .toList();
+
+      if (tonalizacaoTreatments.isNotEmpty) {
+        final frequency = 15; // a cada 15 dias
+
+        for (int day = 15; day < durationInWeeks * 7; day += frequency) {
+          final treatmentDate = startDate.add(Duration(days: day));
+          events.add(ScheduleEvent(
+            id: uuid.v4(),
+            treatmentId: tonalizacaoTreatments.first.id,
+            date: treatmentDate,
+          ));
+        }
+      }
+    }
+
+    // 3. Acidificante (quinzenal, após reconstrução)
+    if (profile.usesAcidificante) {
+      final acidificanteTreatments = availableTreatments
+          .where((t) => t.id == 'acidificante')
+          .toList();
+
+      if (acidificanteTreatments.isNotEmpty) {
+        // Adicionar após cada tratamento de reconstrução
+        for (var event in events.where((e) =>
+        availableTreatments.firstWhere((t) => t.id == e.treatmentId).type == TreatmentType.reconstruction)) {
+
+          events.add(ScheduleEvent(
+            id: uuid.v4(),
+            treatmentId: acidificanteTreatments.first.id,
+            date: event.date.add(const Duration(days: 1)), // Dia seguinte à reconstrução
+          ));
+        }
+      }
+    }
+
+    // 4. Máscara de Argila (quinzenal)
+    final argilaTreatments = availableTreatments
+        .where((t) => t.id == 'mascara_argila')
+        .toList();
+
+    if (argilaTreatments.isNotEmpty) {
+      final frequency = 15; // a cada 15 dias
+
+      for (int day = 10; day < durationInWeeks * 7; day += frequency) {
+        final treatmentDate = startDate.add(Duration(days: day));
+        events.add(ScheduleEvent(
+          id: uuid.v4(),
+          treatmentId: argilaTreatments.first.id,
+          date: treatmentDate,
+        ));
+      }
+    }
+
+    // 5. Retoque de Tintura (a cada 4-6 semanas)
+    if (profile.wantsHairColorRetouching) {
+      final retoqueTreatments = availableTreatments
+          .where((t) => t.id == 'retoque_cor')
+          .toList();
+
+      if (retoqueTreatments.isNotEmpty) {
+        // Verificar a data do último retoque
+        final lastChemical = profile.lastChemicalTreatmentDate;
+        if (lastChemical != null &&
+            profile.chemicalTreatmentType != null &&
+            profile.chemicalTreatmentType!.toLowerCase().contains('cor')) {
+
+          final daysSinceLastTreatment = startDate.difference(lastChemical).inDays;
+          int daysUntilNextTreatment = 42 - daysSinceLastTreatment; // 6 semanas
+
+          if (daysUntilNextTreatment < 0) {
+            daysUntilNextTreatment = 7; // Já está atrasado, programar para semana 1
+          }
+
+          if (daysUntilNextTreatment < durationInWeeks * 7) {
+            final treatmentDate = startDate.add(Duration(days: daysUntilNextTreatment));
+            events.add(ScheduleEvent(
+              id: uuid.v4(),
+              treatmentId: retoqueTreatments.first.id,
+              date: treatmentDate,
+            ));
+          }
+        } else {
+          // Sem histórico, programar para metade do período
+          final treatmentDate = startDate.add(Duration(days: durationInWeeks * 7 ~/ 2));
+          events.add(ScheduleEvent(
+            id: uuid.v4(),
+            treatmentId: retoqueTreatments.first.id,
+            date: treatmentDate,
+          ));
+        }
+      }
+    }
+
     events.sort((a, b) => a.date.compareTo(b.date));
+
+    _adjustOverlappingEvents(events);
     return events;
+  }
+
+  void _adjustOverlappingEvents(List<ScheduleEvent> events) {
+    // Agrupar eventos por data
+    final eventsByDate = <DateTime, List<ScheduleEvent>>{};
+
+    for (var event in events) {
+      final dateKey = DateTime(
+          event.date.year, event.date.month, event.date.day);
+
+      if (!eventsByDate.containsKey(dateKey)) {
+        eventsByDate[dateKey] = [];
+      }
+
+      eventsByDate[dateKey]!.add(event);
+    }
+
+    // Ajustar eventos sobrepostos (mais de 2 por dia)
+    for (var date in eventsByDate.keys) {
+      final dateEvents = eventsByDate[date]!;
+
+      if (dateEvents.length > 2) {
+        // Manter apenas os 2 primeiros eventos neste dia
+        final eventsToReschedule = dateEvents.sublist(2);
+
+        // Remover os eventos excedentes da lista original
+        for (var event in eventsToReschedule) {
+          events.remove(event);
+        }
+
+        // Reagendar para os dias seguintes
+        int offset = 1;
+        for (var event in eventsToReschedule) {
+          event.date = date.add(Duration(days: offset));
+          offset++;
+          events.add(event);
+        }
+      }
+    }
+
+    // Ordenar novamente após os ajustes
+    events.sort((a, b) => a.date.compareTo(b.date));
   }
 }

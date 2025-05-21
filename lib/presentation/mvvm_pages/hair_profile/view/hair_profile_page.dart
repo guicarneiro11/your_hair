@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:your_hair/presentation/mvvm_pages/hair_profile/view/question_widgets/additional_treatments_question.dart';
 import 'package:your_hair/presentation/mvvm_pages/hair_profile/view/question_widgets/heat_styling.dart';
 import '../../../../app/theme.dart';
 import '../providers/hair_profile_provider.dart';
@@ -37,6 +38,7 @@ class _HairProfilePageState extends State<HairProfilePage> {
     const WashFrequencyQuestion(),
     const LastCutQuestion(),
     const ChemicalTreatmentQuestion(),
+    const AdditionalTreatmentsQuestion()
   ];
 
   final List<String> _questionTitles = [
@@ -51,6 +53,7 @@ class _HairProfilePageState extends State<HairProfilePage> {
     'Quantas vezes por semana você lava o cabelo?',
     'Quando foi seu último corte de cabelo?',
     'Você fez algum tratamento químico recentemente?',
+    'Quais tratamentos adicionais você deseja incluir?',
   ];
 
   @override

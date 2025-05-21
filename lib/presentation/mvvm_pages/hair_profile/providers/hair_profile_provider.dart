@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../data/models/hair_profile.dart';
-import '../../../../data/repositories/hair_profile_repository.dart';
 import '../../../../domain/repositories/hair_profile_repository.dart';
 
 class HairProfileProvider with ChangeNotifier {
@@ -13,6 +12,17 @@ class HairProfileProvider with ChangeNotifier {
   HairOiliness? _oiliness;
   HairDamage? _damage;
   bool _usesHeatStyling = false;
+  bool _wantsUmectacao = false;
+  bool _wantsTonalizacao = false;
+  bool _usesAcidificante = false;
+  bool _wantsHairColorRetouching = false;
+  bool _wantsHighlightRetouching = false;
+  bool _wantsStraighteningRetouching = false;
+  bool _hasHairExtensions = false;
+  bool _hasBraids = false;
+  bool _hasDreads = false;
+  bool _needsAntiHairLossTreatment = false;
+  bool _needsDandruffTreatment = false;
   HairElasticity? _elasticity;
   HairPorosity? _porosity;
   int _washFrequencyPerWeek = 3;
@@ -34,6 +44,17 @@ class HairProfileProvider with ChangeNotifier {
   HairOiliness? get oiliness => _oiliness;
   HairDamage? get damage => _damage;
   bool get usesHeatStyling => _usesHeatStyling;
+  bool get wantsUmectacao => _wantsUmectacao;
+  bool get wantsTonalizacao => _wantsTonalizacao;
+  bool get usesAcidificante => _usesAcidificante;
+  bool get wantsHairColorRetouching => _wantsHairColorRetouching;
+  bool get wantsHighlightRetouching => _wantsHighlightRetouching;
+  bool get wantsStraighteningRetouching => _wantsStraighteningRetouching;
+  bool get hasHairExtensions => _hasHairExtensions;
+  bool get hasBraids => _hasBraids;
+  bool get hasDreads => _hasDreads;
+  bool get needsAntiHairLossTreatment => _needsAntiHairLossTreatment;
+  bool get needsDandruffTreatment => _needsDandruffTreatment;
   HairElasticity? get elasticity => _elasticity;
   HairPorosity? get porosity => _porosity;
   int get washFrequencyPerWeek => _washFrequencyPerWeek;
@@ -106,7 +127,63 @@ class HairProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setWantsUmectacao(bool value) {
+    _wantsUmectacao = value;
+    notifyListeners();
+  }
+
+  void setWantsTonalizacao(bool value) {
+    _wantsTonalizacao = value;
+    notifyListeners();
+  }
+
+  void setUsesAcidificante(bool value) {
+    _usesAcidificante = value;
+    notifyListeners();
+  }
+
+  void setWantsHairColorRetouching(bool value) {
+    _wantsHairColorRetouching = value;
+    notifyListeners();
+  }
+
+  void setWantsHighlightRetouching(bool value) {
+    _wantsHighlightRetouching = value;
+    notifyListeners();
+  }
+
+  void setWantsStraighteningRetouching(bool value) {
+    _wantsStraighteningRetouching = value;
+    notifyListeners();
+  }
+
+  void setHasHairExtensions(bool value) {
+    _hasHairExtensions = value;
+    notifyListeners();
+  }
+
+  void setHasBraids(bool value) {
+    _hasBraids = value;
+    notifyListeners();
+  }
+
+  void setHasDreads(bool value) {
+    _hasDreads = value;
+    notifyListeners();
+  }
+
+  void setNeedsAntiHairLossTreatment(bool value) {
+    _needsAntiHairLossTreatment = value;
+    notifyListeners();
+  }
+
+  void setNeedsDandruffTreatment(bool value) {
+    _needsDandruffTreatment = value;
+    notifyListeners();
+  }
+
   HairProfile? createProfile() {
+    // Verificar se todos os campos obrigatórios estão preenchidos
     if (_curvature == null ||
         _length == null ||
         _thickness == null ||
@@ -115,11 +192,12 @@ class HairProfileProvider with ChangeNotifier {
         _elasticity == null ||
         _porosity == null ||
         _lastCutDate == null) {
-      return null;
+      return null; // Não é possível criar um perfil completo
     }
 
+    // Criar e retornar o perfil com todos os campos
     return HairProfile(
-      id: const Uuid().v4(),
+      id: const Uuid().v4(), // Gerar ID único usando UUID
       curvature: _curvature!,
       length: _length!,
       thickness: _thickness!,
@@ -132,6 +210,19 @@ class HairProfileProvider with ChangeNotifier {
       lastCutDate: _lastCutDate!,
       lastChemicalTreatmentDate: _lastChemicalTreatmentDate,
       chemicalTreatmentType: _chemicalTreatmentType,
+
+      // Campos adicionais
+      wantsUmectacao: _wantsUmectacao,
+      wantsTonalizacao: _wantsTonalizacao,
+      usesAcidificante: _usesAcidificante,
+      wantsHairColorRetouching: _wantsHairColorRetouching,
+      wantsHighlightRetouching: _wantsHighlightRetouching,
+      wantsStraighteningRetouching: _wantsStraighteningRetouching,
+      hasHairExtensions: _hasHairExtensions,
+      hasBraids: _hasBraids,
+      hasDreads: _hasDreads,
+      needsAntiHairLossTreatment: _needsAntiHairLossTreatment,
+      needsDandruffTreatment: _needsDandruffTreatment,
     );
   }
 
@@ -156,6 +247,19 @@ class HairProfileProvider with ChangeNotifier {
         _lastCutDate = _currentProfile!.lastCutDate;
         _lastChemicalTreatmentDate = _currentProfile!.lastChemicalTreatmentDate;
         _chemicalTreatmentType = _currentProfile!.chemicalTreatmentType;
+
+        // Carregar novos campos
+        _wantsUmectacao = _currentProfile!.wantsUmectacao;
+        _wantsTonalizacao = _currentProfile!.wantsTonalizacao;
+        _usesAcidificante = _currentProfile!.usesAcidificante;
+        _wantsHairColorRetouching = _currentProfile!.wantsHairColorRetouching;
+        _wantsHighlightRetouching = _currentProfile!.wantsHighlightRetouching;
+        _wantsStraighteningRetouching = _currentProfile!.wantsStraighteningRetouching;
+        _hasHairExtensions = _currentProfile!.hasHairExtensions;
+        _hasBraids = _currentProfile!.hasBraids;
+        _hasDreads = _currentProfile!.hasDreads;
+        _needsAntiHairLossTreatment = _currentProfile!.needsAntiHairLossTreatment;
+        _needsDandruffTreatment = _currentProfile!.needsDandruffTreatment;
       }
     } catch (e) {
       _error = e.toString();
@@ -227,6 +331,19 @@ class HairProfileProvider with ChangeNotifier {
     _lastCutDate = null;
     _lastChemicalTreatmentDate = null;
     _chemicalTreatmentType = null;
+
+    _wantsUmectacao = false;
+    _wantsTonalizacao = false;
+    _usesAcidificante = false;
+    _wantsHairColorRetouching = false;
+    _wantsHighlightRetouching = false;
+    _wantsStraighteningRetouching = false;
+    _hasHairExtensions = false;
+    _hasBraids = false;
+    _hasDreads = false;
+    _needsAntiHairLossTreatment = false;
+    _needsDandruffTreatment = false;
+
     notifyListeners();
   }
 }

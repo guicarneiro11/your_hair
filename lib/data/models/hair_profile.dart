@@ -117,6 +117,39 @@ class HairProfile extends HiveObject {
   @HiveField(12)
   String? chemicalTreatmentType;
 
+  @HiveField(13)
+  bool wantsUmectacao;
+
+  @HiveField(14)
+  bool wantsTonalizacao;
+
+  @HiveField(15)
+  bool usesAcidificante;
+
+  @HiveField(16)
+  bool wantsHairColorRetouching;
+
+  @HiveField(17)
+  bool wantsHighlightRetouching;
+
+  @HiveField(18)
+  bool wantsStraighteningRetouching;
+
+  @HiveField(19)
+  bool hasHairExtensions;
+
+  @HiveField(20)
+  bool hasBraids;
+
+  @HiveField(21)
+  bool hasDreads;
+
+  @HiveField(22)
+  bool needsAntiHairLossTreatment;
+
+  @HiveField(23)
+  bool needsDandruffTreatment;
+
   HairProfile({
     required this.id,
     required this.curvature,
@@ -131,6 +164,17 @@ class HairProfile extends HiveObject {
     required this.lastCutDate,
     this.lastChemicalTreatmentDate,
     this.chemicalTreatmentType,
+    this.wantsUmectacao = false,
+    this.wantsTonalizacao = false,
+    this.usesAcidificante = false,
+    this.wantsHairColorRetouching = false,
+    this.wantsHighlightRetouching = false,
+    this.wantsStraighteningRetouching = false,
+    this.hasHairExtensions = false,
+    this.hasBraids = false,
+    this.hasDreads = false,
+    this.needsAntiHairLossTreatment = false,
+    this.needsDandruffTreatment = false,
   });
 
   HairProfile copyWith({

@@ -159,6 +159,146 @@ class HiveDataSource {
         recommendedFrequencyDays: 30,
         productRecommendations: 'Esfoliantes específicos para couro cabeludo.',
       ),
+      Treatment(
+        id: 'umectacao',
+        name: 'Umectação Noturna',
+        type: TreatmentType.oilTreatment,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Aplicação de óleos capilares para dormir, protegendo os fios e aumentando a nutrição.',
+        durationMinutes: 480, // Noite toda
+        recommendedFrequencyDays: 7, // Semanal
+        productRecommendations: 'Óleo de coco, azeite de oliva, óleo de argan.',
+      ),
+      Treatment(
+        id: 'tonalizacao',
+        name: 'Tonalização/Matização',
+        type: TreatmentType.colorTouch,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Tratamento com pigmentos para manter ou corrigir a cor dos cabelos.',
+        durationMinutes: 30,
+        recommendedFrequencyDays: 15, // A cada 15 dias
+        productRecommendations: 'Máscara matizadora ou shampoo matizador.',
+      ),
+      Treatment(
+        id: 'acidificante',
+        name: 'Tratamento Acidificante',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.light,
+        description: 'Tratamento para equilibrar o pH do cabelo e melhorar o fechamento das cutículas.',
+        durationMinutes: 15,
+        recommendedFrequencyDays: 15, // Quinzenal
+        productRecommendations: 'Vinagre de maçã diluído ou produtos acidificantes específicos.',
+      ),
+      Treatment(
+        id: 'mascara_argila',
+        name: 'Máscara de Argila',
+        type: TreatmentType.detox,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Limpeza profunda do couro cabeludo e fios com argila.',
+        durationMinutes: 30,
+        recommendedFrequencyDays: 15, // Quinzenal
+        productRecommendations: 'Argila verde, branca ou preta.',
+      ),
+      Treatment(
+        id: 'retoque_cor',
+        name: 'Retoque de Cor',
+        type: TreatmentType.colorTouch,
+        intensity: TreatmentIntensity.intensive,
+        description: 'Retoque da coloração na raiz do cabelo.',
+        durationMinutes: 120,
+        recommendedFrequencyDays: 42, // A cada 6 semanas
+        productRecommendations: 'Coloração igual à usada anteriormente.',
+      ),
+      Treatment(
+        id: 'retoque_luzes',
+        name: 'Retoque de Mechas/Luzes',
+        type: TreatmentType.colorTouch,
+        intensity: TreatmentIntensity.intensive,
+        description: 'Retoque de mechas ou luzes que cresceram.',
+        durationMinutes: 180,
+        recommendedFrequencyDays: 90, // A cada 3 meses
+        productRecommendations: 'Procure um profissional especializado.',
+      ),
+      Treatment(
+        id: 'retoque_alisamento',
+        name: 'Retoque de Alisamento',
+        type: TreatmentType.chemicalTreatment,
+        intensity: TreatmentIntensity.intensive,
+        description: 'Retoque de progressiva ou alisamento na raiz.',
+        durationMinutes: 180,
+        recommendedFrequencyDays: 120, // A cada 4 meses
+        productRecommendations: 'Procure um profissional especializado.',
+      ),
+      Treatment(
+        id: 'manutencao_megahair',
+        name: 'Manutenção de Megahair',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Ajuste e manutenção das extensões capilares.',
+        durationMinutes: 120,
+        recommendedFrequencyDays: 40, // A cada 40 dias
+        productRecommendations: 'Procure um profissional especializado.',
+      ),
+      Treatment(
+        id: 'manutencao_trancas',
+        name: 'Manutenção de Tranças',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Ajuste e manutenção das tranças ou box braids.',
+        durationMinutes: 180,
+        recommendedFrequencyDays: 42, // A cada 6 semanas
+        productRecommendations: 'Procure um profissional especializado.',
+      ),
+      Treatment(
+        id: 'manutencao_dreads',
+        name: 'Manutenção de Dreads',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Ajuste e manutenção dos dreads.',
+        durationMinutes: 120,
+        recommendedFrequencyDays: 35, // A cada 5 semanas
+        productRecommendations: 'Procure um profissional especializado.',
+      ),
+      Treatment(
+        id: 'tratamento_antiqueda',
+        name: 'Tratamento Anti-queda',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.intensive,
+        description: 'Tratamento específico para combater a queda de cabelo.',
+        durationMinutes: 40,
+        recommendedFrequencyDays: 7, // Semanal
+        productRecommendations: 'Tônicos capilares específicos ou ampolas anti-queda.',
+      ),
+      Treatment(
+        id: 'tratamento_caspa',
+        name: 'Tratamento para Caspa',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.moderate,
+        description: 'Tratamento específico para controlar a caspa.',
+        durationMinutes: 20,
+        recommendedFrequencyDays: 3, // 2-3 vezes por semana
+        productRecommendations: 'Shampoo anticaspa com zinco ou cetoconazol.',
+      ),
+      Treatment(
+        id: 'limpeza_ferramentas',
+        name: 'Limpeza de Escovas e Pentes',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.light,
+        description: 'Limpeza e higienização de escovas e pentes para remover resíduos.',
+        durationMinutes: 20,
+        recommendedFrequencyDays: 7, // Semanal
+        productRecommendations: 'Água morna com shampoo neutro.',
+      ),
+      Treatment(
+        id: 'foto_acompanhamento',
+        name: 'Registro de Crescimento',
+        type: TreatmentType.special,
+        intensity: TreatmentIntensity.light,
+        description: 'Tirar fotos do cabelo para acompanhar o crescimento e resultados.',
+        durationMinutes: 5,
+        recommendedFrequencyDays: 30, // Mensal
+        productRecommendations: 'Use uma câmera com boa resolução e tire fotos sempre nas mesmas condições de luz.',
+      ),
     ];
   }
 }
