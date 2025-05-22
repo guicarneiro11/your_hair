@@ -575,15 +575,4 @@ class _HomePageState extends State<HomePage> {
         return 'Tratamento Especial';
     }
   }
-
-  String _getIntensityText(TreatmentIntensity intensity) {
-    switch (intensity) {
-      case TreatmentIntensity.light:
-        return 'Leve';
-      case TreatmentIntensity.moderate:
-        return 'Moderada';
-      case TreatmentIntensity.intensive:
-        return 'Intensiva';
-    }
-  }
 }
