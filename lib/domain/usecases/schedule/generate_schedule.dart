@@ -50,20 +50,21 @@ class GenerateScheduleUseCase {
     int deficit = 0;
 
     switch (profile.oiliness) {
-      case HairOiliness.dry: deficit += 3; break;
-      case HairOiliness.normal: deficit += 1; break;
-      case HairOiliness.oily: deficit += 0; break;
+      case HairOiliness.dry: deficit += 4; break;
+      case HairOiliness.normal: deficit += 2; break;
+      case HairOiliness.oily: deficit += 1; break;
     }
 
-    if (profile.porosity == HairPorosity.high) deficit += 2;
-    if (profile.porosity == HairPorosity.low) deficit -= 1;
+    if (profile.porosity == HairPorosity.high) deficit += 3;
+    if (profile.porosity == HairPorosity.medium) deficit += 1;
 
     if (profile.usesHeatStyling) deficit += 2;
-    if (profile.washFrequencyPerWeek > 5) deficit += 1;
+    if (profile.washFrequencyPerWeek > 4) deficit += 2;
 
     switch (profile.damage) {
-      case HairDamage.severe: deficit += 2; break;
-      case HairDamage.moderate: deficit += 1; break;
+      case HairDamage.severe: deficit += 3; break;
+      case HairDamage.moderate: deficit += 2; break;
+      case HairDamage.light: deficit += 1; break;
       default: break;
     }
 
@@ -76,8 +77,8 @@ class GenerateScheduleUseCase {
     switch (profile.curvature) {
       case HairCurvature.straight: deficit += 0; break;
       case HairCurvature.wavy: deficit += 1; break;
-      case HairCurvature.curly: deficit += 2; break;
-      case HairCurvature.coily: deficit += 3; break;
+      case HairCurvature.curly: deficit += 3; break;
+      case HairCurvature.coily: deficit += 4; break;
     }
 
     switch (profile.length) {
@@ -86,13 +87,15 @@ class GenerateScheduleUseCase {
       case HairLength.long: deficit += 2; break;
     }
 
-    if (profile.oiliness == HairOiliness.dry) deficit += 1;
+    if (profile.oiliness == HairOiliness.dry) deficit += 2;
 
     switch (profile.damage) {
       case HairDamage.moderate: deficit += 1; break;
       case HairDamage.severe: deficit += 2; break;
       default: break;
     }
+
+    if (profile.porosity == HairPorosity.high) deficit += 1;
 
     return deficit.clamp(0, 10);
   }
@@ -101,9 +104,9 @@ class GenerateScheduleUseCase {
     int deficit = 0;
 
     switch (profile.elasticity) {
-      case HairElasticity.low: deficit += 3; break;
-      case HairElasticity.medium: deficit += 0; break;
-      case HairElasticity.high: deficit -= 1; break;
+      case HairElasticity.low: deficit += 4; break;
+      case HairElasticity.medium: deficit += 1; break;
+      case HairElasticity.high: deficit += 0; break;
     }
 
     switch (profile.damage) {
@@ -115,15 +118,14 @@ class GenerateScheduleUseCase {
 
     if (profile.lastChemicalTreatmentDate != null) {
       final daysSinceChemical = DateTime.now().difference(profile.lastChemicalTreatmentDate!).inDays;
-      if (daysSinceChemical < 30) deficit += 2;
-      else if (daysSinceChemical < 90) deficit += 1;
+      if (daysSinceChemical < 30) deficit += 3;
+      else if (daysSinceChemical < 90) deficit += 2;
+      else if (daysSinceChemical < 180) deficit += 1;
     }
 
     if (profile.usesHeatStyling) deficit += 1;
 
-    if (profile.porosity == HairPorosity.high && profile.damage != HairDamage.none) {
-      deficit += 1;
-    }
+    if (profile.porosity == HairPorosity.high) deficit += 2;
 
     return deficit.clamp(0, 10);
   }
@@ -132,8 +134,8 @@ class GenerateScheduleUseCase {
     final daysSinceLastCut = DateTime.now().difference(profile.lastCutDate).inDays;
 
     switch (profile.length) {
-      case HairLength.short: return daysSinceLastCut >= 30;
-      case HairLength.medium: return daysSinceLastCut >= 60;
+      case HairLength.short: return daysSinceLastCut >= 45;
+      case HairLength.medium: return daysSinceLastCut >= 75;
       case HairLength.long: return daysSinceLastCut >= 90;
     }
   }
@@ -150,15 +152,15 @@ class GenerateScheduleUseCase {
     int health = 100;
 
     switch (profile.damage) {
-      case HairDamage.severe: health -= 40; break;
-      case HairDamage.moderate: health -= 25; break;
+      case HairDamage.severe: health -= 30; break;
+      case HairDamage.moderate: health -= 20; break;
       case HairDamage.light: health -= 10; break;
       default: break;
     }
 
-    if (profile.usesHeatStyling) health -= 15;
+    if (profile.usesHeatStyling) health -= 10;
     if (profile.washFrequencyPerWeek > 5) health -= 10;
-    if (profile.elasticity == HairElasticity.low) health -= 20;
+    if (profile.elasticity == HairElasticity.low) health -= 15;
     if (profile.porosity == HairPorosity.high) health -= 10;
 
     return health.clamp(0, 100);
@@ -167,27 +169,45 @@ class GenerateScheduleUseCase {
   TreatmentStrategy _createScientificStrategy(HairDiagnosis diagnosis, HairProfile profile) {
     List<TreatmentPriority> priorities = [];
 
-    if (diagnosis.hydrationDeficit > 0) {
+    int totalDeficit = diagnosis.hydrationDeficit + diagnosis.lipidDeficit + diagnosis.proteinDeficit;
+
+    double hydrationRatio = totalDeficit > 0 ? diagnosis.hydrationDeficit / totalDeficit : 0.33;
+    double nutritionRatio = totalDeficit > 0 ? diagnosis.lipidDeficit / totalDeficit : 0.33;
+    double reconstructionRatio = totalDeficit > 0 ? diagnosis.proteinDeficit / totalDeficit : 0.34;
+
+    if (diagnosis.overallHealthScore >= 80) {
+      hydrationRatio = 0.5;
+      nutritionRatio = 0.3;
+      reconstructionRatio = 0.2;
+    }
+
+    int treatmentsPerWeek = _calculateTreatmentsPerWeek(profile);
+
+    if (hydrationRatio > 0) {
       priorities.add(TreatmentPriority(
         type: TreatmentType.hydration,
         urgency: diagnosis.hydrationDeficit,
-        weeklyFrequency: _calculateHydrationFrequency(diagnosis, profile),
+        weeklyFrequency: (treatmentsPerWeek * hydrationRatio).round(),
       ));
     }
 
-    if (diagnosis.lipidDeficit > 0) {
+    if (nutritionRatio > 0) {
       priorities.add(TreatmentPriority(
         type: TreatmentType.nutrition,
         urgency: diagnosis.lipidDeficit,
-        weeklyFrequency: _calculateNutritionFrequency(diagnosis, profile),
+        weeklyFrequency: (treatmentsPerWeek * nutritionRatio).round(),
       ));
     }
 
-    if (diagnosis.proteinDeficit > 0) {
+    if (reconstructionRatio > 0 && diagnosis.proteinDeficit > 2) {
+      int reconstructionFreq = (treatmentsPerWeek * reconstructionRatio).round();
+      if (reconstructionFreq == 0 && diagnosis.proteinDeficit > 4) {
+        reconstructionFreq = 1;
+      }
       priorities.add(TreatmentPriority(
         type: TreatmentType.reconstruction,
         urgency: diagnosis.proteinDeficit,
-        weeklyFrequency: _calculateReconstructionFrequency(diagnosis, profile),
+        weeklyFrequency: reconstructionFreq,
       ));
     }
 
@@ -196,7 +216,8 @@ class GenerateScheduleUseCase {
     return TreatmentStrategy(
       priorities: priorities,
       washDaysPerWeek: profile.washFrequencyPerWeek,
-      needsUmectacao: profile.wantsUmectacao,
+      needsUmectacao: _shouldDoUmectacao(profile),
+      umectacaoFrequencyDays: _calculateUmectacaoFrequency(profile),
       needsAcidificante: profile.usesAcidificante,
       needsTonalizacao: profile.wantsTonalizacao,
       needsHaircut: diagnosis.needsHaircut,
@@ -204,36 +225,32 @@ class GenerateScheduleUseCase {
     );
   }
 
-  int _calculateHydrationFrequency(HairDiagnosis diagnosis, HairProfile profile) {
-    if (diagnosis.hydrationDeficit >= 5) {
-      return (profile.washFrequencyPerWeek * 0.6).round();
-    } else if (diagnosis.hydrationDeficit >= 3) {
-      return (profile.washFrequencyPerWeek * 0.4).round();
-    } else {
-      return (profile.washFrequencyPerWeek * 0.3).round();
-    }
+  int _calculateTreatmentsPerWeek(HairProfile profile) {
+    return profile.washFrequencyPerWeek.clamp(1, 7);
   }
 
-  int _calculateNutritionFrequency(HairDiagnosis diagnosis, HairProfile profile) {
-    int baseFreq = profile.curvature == HairCurvature.coily ||
-        profile.curvature == HairCurvature.curly ? 2 : 1;
+  bool _shouldDoUmectacao(HairProfile profile) {
+    if (!profile.wantsUmectacao) return false;
 
-    if (diagnosis.lipidDeficit >= 5) {
-      return baseFreq + 1;
-    } else if (diagnosis.lipidDeficit >= 3) {
-      return baseFreq;
-    } else {
-      return (baseFreq * 0.5).round();
-    }
+    return profile.curvature == HairCurvature.curly ||
+        profile.curvature == HairCurvature.coily ||
+        profile.oiliness == HairOiliness.dry ||
+        profile.damage == HairDamage.moderate ||
+        profile.damage == HairDamage.severe;
   }
 
-  int _calculateReconstructionFrequency(HairDiagnosis diagnosis, HairProfile profile) {
-    if (diagnosis.proteinDeficit >= 6) {
-      return 2;
-    } else if (diagnosis.proteinDeficit >= 3) {
-      return 1;
-    } else {
-      return 0;
+  int _calculateUmectacaoFrequency(HairProfile profile) {
+    if (!profile.wantsUmectacao) return 0;
+
+    switch (profile.curvature) {
+      case HairCurvature.straight:
+        return profile.oiliness == HairOiliness.dry ? 14 : 21;
+      case HairCurvature.wavy:
+        return profile.oiliness == HairOiliness.dry ? 10 : 14;
+      case HairCurvature.curly:
+        return 7;
+      case HairCurvature.coily:
+        return 7;
     }
   }
 
@@ -249,6 +266,7 @@ class GenerateScheduleUseCase {
         break;
       case ScalpCondition.oily:
         treatments.add('detox');
+        treatments.add('exfoliation');
         break;
       default:
         break;
@@ -271,44 +289,81 @@ class GenerateScheduleUseCase {
         durationInWeeks
     );
 
-    final treatmentCycle = _createTreatmentCycle(strategy);
+    final treatmentCycle = _createBalancedTreatmentCycle(strategy);
     int cycleIndex = 0;
+
+    DateTime? lastUmectacaoDate;
+    DateTime? lastDetoxDate;
+    DateTime? lastTonalizacaoDate;
+    int reconstructionCount = 0;
 
     for (int i = 0; i < washDays.length; i++) {
       final washDay = washDays[i];
-      final treatmentType = treatmentCycle[cycleIndex % treatmentCycle.length];
 
-      if (strategy.needsUmectacao && _shouldDoUmectacao(i, treatmentType)) {
-        final umectacaoDay = DateTime(
-            washDay.year,
-            washDay.month,
-            washDay.day - 1,
-            20,
-            0
-        );
-        if (umectacaoDay.isAfter(DateTime.now())) {
-          events.add(_createEvent(uuid, 'umectacao', umectacaoDay));
-        }
-      }
-
-      final treatment = _findTreatmentByType(treatmentType);
-      if (treatment != null) {
-        events.add(_createEvent(uuid, treatment.id, washDay));
-
-        if (treatmentType == TreatmentType.reconstruction && strategy.needsAcidificante) {
-          final acidificanteTime = DateTime(
-            washDay.year,
-            washDay.month,
-            washDay.day,
-            washDay.hour,
-            washDay.minute + 30,
+      if (strategy.needsUmectacao && strategy.umectacaoFrequencyDays > 0) {
+        if (lastUmectacaoDate == null ||
+            washDay.difference(lastUmectacaoDate).inDays >= strategy.umectacaoFrequencyDays) {
+          final umectacaoDay = DateTime(
+              washDay.year,
+              washDay.month,
+              washDay.day - 1,
+              20,
+              0
           );
-          events.add(_createEvent(uuid, 'acidificante', acidificanteTime));
+          if (umectacaoDay.isAfter(DateTime.now())) {
+            events.add(_createEvent(uuid, 'umectacao', umectacaoDay));
+            lastUmectacaoDate = washDay;
+          }
         }
       }
 
-      if (strategy.needsTonalizacao && i > 0 && i % 6 == 0) {
-        events.add(_createEvent(uuid, 'tonalizacao', washDay));
+      if (cycleIndex < treatmentCycle.length) {
+        final treatmentType = treatmentCycle[cycleIndex % treatmentCycle.length];
+        final treatment = _findTreatmentByType(treatmentType);
+
+        if (treatment != null) {
+          if (treatmentType == TreatmentType.reconstruction) {
+            reconstructionCount++;
+            if (reconstructionCount > 2 && reconstructionCount % 3 == 0) {
+              cycleIndex++;
+              if (cycleIndex < treatmentCycle.length) {
+                final alternativeTreatment = _findTreatmentByType(treatmentCycle[cycleIndex % treatmentCycle.length]);
+                if (alternativeTreatment != null) {
+                  events.add(_createEvent(uuid, alternativeTreatment.id, washDay));
+                }
+              }
+            } else {
+              events.add(_createEvent(uuid, treatment.id, washDay));
+
+              if (strategy.needsAcidificante) {
+                final acidificanteTime = DateTime(
+                  washDay.year,
+                  washDay.month,
+                  washDay.day,
+                  washDay.hour,
+                  washDay.minute + 30,
+                );
+                events.add(_createEvent(uuid, 'acidificante', acidificanteTime));
+              }
+            }
+          } else {
+            events.add(_createEvent(uuid, treatment.id, washDay));
+          }
+        }
+      }
+
+      if (strategy.needsTonalizacao) {
+        if (lastTonalizacaoDate == null ||
+            washDay.difference(lastTonalizacaoDate).inDays >= 15) {
+          events.add(_createEvent(uuid, 'tonalizacao', washDay));
+          lastTonalizacaoDate = washDay;
+        }
+      }
+
+      if ((lastDetoxDate == null || washDay.difference(lastDetoxDate).inDays >= 30) &&
+          (profile.oiliness == HairOiliness.oily || i % 8 == 0)) {
+        events.add(_createEvent(uuid, 'detox', washDay));
+        lastDetoxDate = washDay;
       }
 
       cycleIndex++;
@@ -319,47 +374,87 @@ class GenerateScheduleUseCase {
       events.add(_createEvent(uuid, 'haircut', cutDate));
     }
 
+    events.addAll(_addSpecialTreatments(uuid, profile, washDays));
     events.addAll(_addScalpTreatments(uuid, strategy, washDays));
+    events.addAll(_addMaintenanceTreatments(uuid, profile, startDate));
 
     events.sort((a, b) => a.date.compareTo(b.date));
     return events;
   }
 
-  List<TreatmentType> _createTreatmentCycle(TreatmentStrategy strategy) {
+  List<TreatmentType> _createBalancedTreatmentCycle(TreatmentStrategy strategy) {
     final cycle = <TreatmentType>[];
-    final priorities = strategy.priorities;
 
-    if (priorities.isEmpty) return [TreatmentType.hydration];
-
-    for (final priority in priorities) {
+    for (final priority in strategy.priorities) {
       for (int i = 0; i < priority.weeklyFrequency; i++) {
         cycle.add(priority.type);
       }
     }
 
-    while (cycle.length < 4) {
-      cycle.add(priorities.first.type);
+    if (cycle.isEmpty) {
+      cycle.add(TreatmentType.hydration);
     }
 
-    return cycle;
-  }
+    cycle.sort((a, b) {
+      final priorityA = strategy.priorities.firstWhere((p) => p.type == a).urgency;
+      final priorityB = strategy.priorities.firstWhere((p) => p.type == b).urgency;
+      return priorityB.compareTo(priorityA);
+    });
 
-  bool _shouldDoUmectacao(int washIndex, TreatmentType treatmentType) {
-    return washIndex % 3 == 0 &&
-        (treatmentType == TreatmentType.hydration ||
-            treatmentType == TreatmentType.nutrition) &&
-        treatmentType != TreatmentType.reconstruction;
+    final balancedCycle = <TreatmentType>[];
+    int hydrationCount = 0;
+    int nutritionCount = 0;
+    int reconstructionCount = 0;
+
+    for (final type in cycle) {
+      switch (type) {
+        case TreatmentType.hydration:
+          hydrationCount++;
+          break;
+        case TreatmentType.nutrition:
+          nutritionCount++;
+          break;
+        case TreatmentType.reconstruction:
+          reconstructionCount++;
+          break;
+        default:
+          break;
+      }
+    }
+
+    while (hydrationCount > 0 || nutritionCount > 0 || reconstructionCount > 0) {
+      if (hydrationCount > 0) {
+        balancedCycle.add(TreatmentType.hydration);
+        hydrationCount--;
+      }
+      if (nutritionCount > 0) {
+        balancedCycle.add(TreatmentType.nutrition);
+        nutritionCount--;
+      }
+      if (reconstructionCount > 0 && balancedCycle.length % 3 == 2) {
+        balancedCycle.add(TreatmentType.reconstruction);
+        reconstructionCount--;
+      } else if (hydrationCount > 0) {
+        balancedCycle.add(TreatmentType.hydration);
+        hydrationCount--;
+      } else if (nutritionCount > 0) {
+        balancedCycle.add(TreatmentType.nutrition);
+        nutritionCount--;
+      }
+    }
+
+    return balancedCycle;
   }
 
   List<DateTime> _generateWashSchedule(int washesPerWeek, DateTime startDate, int weeks) {
     final washDays = <DateTime>[];
 
     final patterns = {
-      1: [0],
+      1: [3],
       2: [0, 3],
-      3: [0, 2, 4],
+      3: [0, 2, 5],
       4: [0, 2, 4, 6],
-      5: [1, 2, 3, 4, 5],
+      5: [0, 1, 3, 4, 6],
       6: [0, 1, 2, 4, 5, 6],
       7: [0, 1, 2, 3, 4, 5, 6],
     };
@@ -380,8 +475,8 @@ class GenerateScheduleUseCase {
     final daysSinceLastCut = DateTime.now().difference(profile.lastCutDate).inDays;
 
     final intervalMap = {
-      HairLength.short: 30,
-      HairLength.medium: 60,
+      HairLength.short: 45,
+      HairLength.medium: 75,
       HairLength.long: 90,
     };
 
@@ -390,8 +485,47 @@ class GenerateScheduleUseCase {
     if (daysSinceLastCut >= interval) {
       return startDate.add(const Duration(days: 7));
     } else {
-      return profile.lastCutDate.add(Duration(days: interval));
+      final nextCutDate = profile.lastCutDate.add(Duration(days: interval));
+      if (nextCutDate.isBefore(startDate.add(Duration(days: durationInWeeks * 7)))) {
+        return nextCutDate;
+      }
     }
+
+    return startDate.add(Duration(days: durationInWeeks * 7 + 7));
+  }
+
+  List<ScheduleEvent> _addSpecialTreatments(
+      Uuid uuid,
+      HairProfile profile,
+      List<DateTime> washDays
+      ) {
+    final events = <ScheduleEvent>[];
+
+    if (profile.wantsHairColorRetouching) {
+      final colorDate = washDays.firstWhere(
+            (date) => date.isAfter(DateTime.now().add(const Duration(days: 30))),
+        orElse: () => washDays.last,
+      );
+      events.add(_createEvent(uuid, 'retoque_cor', colorDate));
+    }
+
+    if (profile.wantsHighlightRetouching) {
+      final highlightDate = washDays.firstWhere(
+            (date) => date.isAfter(DateTime.now().add(const Duration(days: 60))),
+        orElse: () => washDays.last,
+      );
+      events.add(_createEvent(uuid, 'retoque_luzes', highlightDate));
+    }
+
+    if (profile.wantsStraighteningRetouching) {
+      final straighteningDate = washDays.firstWhere(
+            (date) => date.isAfter(DateTime.now().add(const Duration(days: 90))),
+        orElse: () => washDays.last,
+      );
+      events.add(_createEvent(uuid, 'retoque_alisamento', straighteningDate));
+    }
+
+    return events;
   }
 
   List<ScheduleEvent> _addScalpTreatments(
@@ -407,10 +541,54 @@ class GenerateScheduleUseCase {
         orElse: () => availableTreatments.first,
       );
 
-      for (int i = 0; i < washDays.length; i += treatment.recommendedFrequencyDays ~/ 7) {
+      int frequency = 7;
+      if (treatmentId == 'tratamento_caspa') frequency = 3;
+      if (treatmentId == 'tratamento_antiqueda') frequency = 7;
+      if (treatmentId == 'detox') frequency = 30;
+      if (treatmentId == 'exfoliation') frequency = 30;
+
+      for (int i = 0; i < washDays.length; i += (frequency * 7 ~/ strategy.washDaysPerWeek).clamp(1, washDays.length)) {
         if (i < washDays.length) {
           events.add(_createEvent(uuid, treatment.id, washDays[i]));
         }
+      }
+    }
+
+    return events;
+  }
+
+  List<ScheduleEvent> _addMaintenanceTreatments(
+      Uuid uuid,
+      HairProfile profile,
+      DateTime startDate
+      ) {
+    final events = <ScheduleEvent>[];
+
+    if (profile.hasHairExtensions) {
+      for (int week = 5; week < durationInWeeks; week += 6) {
+        final maintenanceDate = startDate.add(Duration(days: week * 7));
+        events.add(_createEvent(uuid, 'manutencao_megahair', maintenanceDate));
+      }
+    }
+
+    if (profile.hasBraids) {
+      for (int week = 4; week < durationInWeeks; week += 6) {
+        final maintenanceDate = startDate.add(Duration(days: week * 7));
+        events.add(_createEvent(uuid, 'manutencao_trancas', maintenanceDate));
+      }
+    }
+
+    if (profile.hasDreads) {
+      for (int week = 4; week < durationInWeeks; week += 5) {
+        final maintenanceDate = startDate.add(Duration(days: week * 7));
+        events.add(_createEvent(uuid, 'manutencao_dreads', maintenanceDate));
+      }
+    }
+
+    for (int week = 0; week < durationInWeeks; week++) {
+      final photoDate = startDate.add(Duration(days: week * 7));
+      if (week % 4 == 0) {
+        events.add(_createEvent(uuid, 'foto_acompanhamento', photoDate));
       }
     }
 
@@ -473,6 +651,7 @@ class TreatmentStrategy {
   final List<TreatmentPriority> priorities;
   final int washDaysPerWeek;
   final bool needsUmectacao;
+  final int umectacaoFrequencyDays;
   final bool needsAcidificante;
   final bool needsTonalizacao;
   final bool needsHaircut;
@@ -482,6 +661,7 @@ class TreatmentStrategy {
     required this.priorities,
     required this.washDaysPerWeek,
     required this.needsUmectacao,
+    this.umectacaoFrequencyDays = 14,
     required this.needsAcidificante,
     required this.needsTonalizacao,
     required this.needsHaircut,
