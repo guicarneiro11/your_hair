@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/repositories/hair_profile_repository.dart';
-import '../data/repositories/schedule_repository.dart';
-import '../data/repositories/treatment_repository.dart';
 import '../domain/repositories/hair_profile_repository.dart';
 import '../domain/repositories/schedule_repository.dart';
 import '../domain/repositories/treatment_repository.dart';
-import '../presentation/mvvm_pages/onboarding/view/onboarding_page.dart';
-import '../presentation/mvvm_pages/hair_profile/view/hair_profile_page.dart';
 import '../presentation/mvvm_pages/hair_profile/providers/hair_profile_provider.dart';
-import '../presentation/mvvm_pages/home/view/home_page.dart';
+import '../presentation/mvvm_pages/hair_profile/view/hair_profile_page.dart';
 import '../presentation/mvvm_pages/home/providers/home_provider.dart';
-import '../core/di/service_locator.dart';
+import '../presentation/mvvm_pages/home/view/home_page.dart';
+import '../presentation/mvvm_pages/onboarding/view/onboarding_page.dart';
+import '../presentation/startup/startup_page.dart';
 
 class AppRoutes {
   static const String initial = '/';
+  static const String startup = '/startup';
   static const String onboarding = '/onboarding';
   static const String hairProfile = '/hair-profile';
   static const String home = '/home';
@@ -26,6 +24,10 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case initial:
+      case startup:
+        return MaterialPageRoute(
+          builder: (_) => const StartupPage(),
+        );
       case onboarding:
         return MaterialPageRoute(
           builder: (_) => const OnboardingPage(),
@@ -50,7 +52,6 @@ class AppRoutes {
             child: const HomePage(),
           ),
         );
-    // Adicione outras rotas conforme for implementando as páginas
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

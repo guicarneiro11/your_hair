@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../../../app/theme.dart';
+import '../../../../data/models/hair_profile.dart';
 import '../../../../data/models/schedule.dart';
 import '../../../../data/models/treatment.dart';
 import '../providers/home_provider.dart';
@@ -101,10 +102,42 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => provider.regenerateSchedule(),
+            tooltip: 'Regenerar Cronograma',
           ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'redo_questionnaire':
+                  _showRedoQuestionnaireDialog();
+                  break;
+                case 'profile':
+                  _showProfileInfo(provider.profile);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'redo_questionnaire',
+                child: Row(
+                  children: [
+                    Icon(Icons.quiz, color: AppColors.primary),
+                    SizedBox(width: 8),
+                    Text('Refazer Questionário'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: AppColors.primary),
+                    SizedBox(width: 8),
+                    Text('Meu Perfil'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -573,6 +606,220 @@ class _HomePageState extends State<HomePage> {
         return 'Tratamento Químico';
       case TreatmentType.special:
         return 'Tratamento Especial';
+    }
+  }
+
+  void _showRedoQuestionnaireDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Refazer Questionário'),
+        content: const Text(
+          'Você deseja refazer o questionário do seu perfil capilar?\n\n'
+              'Isso irá substituir suas respostas atuais e gerar um novo cronograma personalizado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/hair-profile');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Sim, Refazer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showProfileInfo(HairProfile? profile) {
+    if (profile == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text(
+                'Meu Perfil Capilar',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    _buildProfileItem('Curvatura', _getCurvatureText(profile.curvature), Icons.waves),
+                    _buildProfileItem('Comprimento', _getLengthText(profile.length), Icons.straighten),
+                    _buildProfileItem('Espessura', _getThicknessText(profile.thickness), Icons.linear_scale),
+                    _buildProfileItem('Oleosidade', _getOilinessText(profile.oiliness), Icons.water_drop),
+                    _buildProfileItem('Danos', _getDamageText(profile.damage), Icons.warning_amber),
+                    _buildProfileItem('Usa Calor', profile.usesHeatStyling ? 'Sim' : 'Não', Icons.whatshot),
+                    _buildProfileItem('Elasticidade', _getElasticityText(profile.elasticity), Icons.open_with),
+                    _buildProfileItem('Porosidade', _getPorosityText(profile.porosity), Icons.bubble_chart),
+                    _buildProfileItem('Lavagem por Semana', '${profile.washFrequencyPerWeek}x', Icons.local_laundry_service),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showRedoQuestionnaireDialog();
+                },
+                child: const Text('Refazer Questionário'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileItem(String label, String value, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMedium,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getCurvatureText(HairCurvature curvature) {
+    switch (curvature) {
+      case HairCurvature.straight: return 'Liso';
+      case HairCurvature.wavy: return 'Ondulado';
+      case HairCurvature.curly: return 'Cacheado';
+      case HairCurvature.coily: return 'Crespo';
+    }
+  }
+
+  String _getLengthText(HairLength length) {
+    switch (length) {
+      case HairLength.short: return 'Curto';
+      case HairLength.medium: return 'Médio';
+      case HairLength.long: return 'Longo';
+    }
+  }
+
+  String _getThicknessText(HairThickness thickness) {
+    switch (thickness) {
+      case HairThickness.fine: return 'Fino';
+      case HairThickness.medium: return 'Médio';
+      case HairThickness.thick: return 'Grosso';
+    }
+  }
+
+  String _getOilinessText(HairOiliness oiliness) {
+    switch (oiliness) {
+      case HairOiliness.dry: return 'Seco';
+      case HairOiliness.normal: return 'Normal';
+      case HairOiliness.oily: return 'Oleoso';
+    }
+  }
+
+  String _getDamageText(HairDamage damage) {
+    switch (damage) {
+      case HairDamage.none: return 'Sem Danos';
+      case HairDamage.light: return 'Danos Leves';
+      case HairDamage.moderate: return 'Danos Moderados';
+      case HairDamage.severe: return 'Danos Severos';
+    }
+  }
+
+  String _getElasticityText(HairElasticity elasticity) {
+    switch (elasticity) {
+      case HairElasticity.low: return 'Baixa';
+      case HairElasticity.medium: return 'Média';
+      case HairElasticity.high: return 'Alta';
+    }
+  }
+
+  String _getPorosityText(HairPorosity porosity) {
+    switch (porosity) {
+      case HairPorosity.low: return 'Baixa';
+      case HairPorosity.medium: return 'Média';
+      case HairPorosity.high: return 'Alta';
     }
   }
 }
